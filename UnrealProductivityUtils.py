@@ -149,7 +149,6 @@ def main():
         sys.exit(1)
     
     should_open_rider = True
-    compilation_failed = False
     
     try:
         # Run GenerateProjectFiles.bat if requested
@@ -189,9 +188,9 @@ def main():
                 exit_code = run_command(str(build_bat), args=build_args, cwd=str(unreal_engine_path))
                 
                 if exit_code != 0:
-                    print_colored(f"Warning: Compilation failed with exit code: {exit_code}", Colors.YELLOW)
-                    print_colored("Opening Rider anyway...", Colors.YELLOW)
-                    compilation_failed = True
+                    print_colored(f"Compilation failed with exit code: {exit_code}", Colors.RED)
+                    should_open_rider = False
+                    sys.exit(exit_code)
                 else:
                     print_colored("Compilation completed successfully!", Colors.GREEN)
             else:
@@ -211,7 +210,7 @@ def main():
                     print_colored("Rider opened successfully!", Colors.GREEN)
                 except Exception as e:
                     print_colored(f"Error opening Rider: {e}", Colors.RED)
-                    compilation_failed = True
+                    sys.exit(1)
             else:
                 print_colored("Rider executable not found. Attempting to open with 'rider' command...", Colors.YELLOW)
                 try:
@@ -220,19 +219,11 @@ def main():
                 except Exception as e:
                     print_colored("Error: Could not find Rider. Please update the script with the correct Rider path.", Colors.RED)
                     print_colored(f"Error details: {e}", Colors.RED)
-                    compilation_failed = True
+                    sys.exit(1)
     
     except Exception as e:
         print_colored(f"Error: {e}", Colors.RED)
-        compilation_failed = True
-    
-    # Pause console if compilation failed, otherwise exit normally
-    if compilation_failed:
-        print_colored("\nPress any key to exit...", Colors.YELLOW)
-        try:
-            input()
-        except (EOFError, KeyboardInterrupt):
-            pass
+        sys.exit(1)
 
 
 if __name__ == '__main__':
